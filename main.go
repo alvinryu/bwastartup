@@ -1,14 +1,13 @@
 package main
 
 import (
-	"strings"
+  "strings"
   "bwastartup/user"
   "bwastartup/campaign"
   "bwastartup/handler"
   "bwastartup/auth"
   "bwastartup/helper"
   "log"
-  "fmt"
   "github.com/gin-gonic/gin"
   "gorm.io/driver/mysql"
   "gorm.io/gorm"
@@ -31,10 +30,9 @@ func main() {
 	campaignService := campaign.NewService(campaignRepository)
 	authService := auth.NewService()
 
-	campaigns, _ := campaignService.FindCampaigns(1)
-	fmt.Println(len(campaigns))
-
 	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
+
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
@@ -43,6 +41,8 @@ func main() {
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
 	api.GET("/users/fetch", userHandler.FetchUser)
+
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
 
 	router.Run()
 }
